@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnemyVis - Game Dev Contrast Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .enemy-blob { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen pb-20">
+
+    <!-- Header -->
+    <nav class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-black tracking-tighter text-white uppercase">
+                Enemy<span class="text-orange-500">Vis</span> <span class="text-xs font-normal text-slate-500 ml-2 italic tracking-normal">Gamedev Hierarchy Tool</span>
+            </h1>
+            <div class="text-xs bg-slate-800 px-3 py-1 rounded text-slate-400 uppercase tracking-widest font-bold">Contrast v1.0</div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 mt-12">
+        <!-- Upload Area -->
+        <div id="drop-zone" class="relative group cursor-pointer border-2 border-dashed border-slate-700 rounded-3xl p-16 transition-all hover:border-orange-500/50 hover:bg-slate-800/30 text-center mb-12">
+            <input type="file" id="file-input" class="hidden" accept="image/*">
+            <div id="upload-prompt">
+                <div class="bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h2 class="text-xl font-bold text-white">Upload Game Screenshot</h2>
+                <p class="text-slate-400 mt-2">Glisse une image ou clique pour analyser la visibilité</p>
+            </div>
+            <img id="preview" class="hidden max-h-96 mx-auto rounded-xl shadow-2xl border border-slate-700">
+        </div>
+
+        <div id="results" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            <!-- Sidebar: Environment Analysis -->
+            <div class="lg:col-span-4 space-y-8">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Couleurs dominantes</h3>
+                    <div id="scene-palette" class="grid grid-cols-1 gap-2">
+                        <!-- JS injected -->
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
+                    <h3 class="text-white font-bold mb-2">Rapport d'analyse</h3>
+                    <p id="analysis-text" class="text-sm text-slate-400 leading-relaxed italic">
+                        Traitement de l'image...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Main Content: The Enemy Solutions -->
+            <div class="lg:col-span-8 space-y-12">
+                
+                <section>
+                    <div class="flex items-end justify-between mb-6">
+                        <h2 class="text-3xl font-black text-white italic uppercase tracking-tighter">Couleurs recommandées</h2>
+                        <span class="text-orange-500 text-sm font-bold uppercase tracking-widest">Haut Contraste</span>
+                    </div>
+
+                    <div id="enemy-options" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- JS injected -->
+                    </div>
+                </section>
+
+                <!-- Visibility Simulator -->
+                <section class="bg-black/40 rounded-3xl p-8 border border-slate-800">
+                    <h3 class="text-white font-bold mb-6 flex items-center">
+                        <span class="mr-2">👁️</span> Simulateur de lisibilité (Scène vs. Ennemi)
+                    </h3>
+                    <div class="relative h-64 w-full rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center">
+                        <div id="sim-bg" class="absolute inset-0 bg-cover bg-center blur-md opacity-40 scale-110"></div>
+                        
+                        <!-- Simulated Enemies -->
+                        <div class="relative z-10 flex space-x-12">
+                            <div class="text-center">
+                                <div id="dot-1" class="enemy-blob w-16 h-16 rounded-full shadow-lg mx-auto mb-3 border-2 border-white/20"></div>
+                                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Basique</span>
+                            </div>
+                            <div class="text-center">
+                                <div id="dot-2" class="enemy-blob w-16 h-16 rounded-full shadow-lg mx-auto mb-3 border-2 border-white/20"></div>
+                                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Elite</span>
+                            </div>
+                            <div class="text-center">
+                                <div id="dot-3" class="enemy-blob w-16 h-16 rounded-full shadow-lg mx-auto mb-3 border-2 border-white/20"></div>
+                                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Boss</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-xs text-slate-500 text-center uppercase tracking-tighter font-medium">Simule comment les couleurs "percent" à travers le bruit visuel de ton environnement.</p>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const colorThief = new ColorThief();
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const preview = document.getElementById('preview');
+        const results = document.getElementById('results');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-orange-500'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-orange-500'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) handleImage(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleImage(e.target.files[0]);
+        });
+
+        function handleImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                document.getElementById('sim-bg').style.backgroundImage = `url(${e.target.result})`;
+                preview.classList.remove('hidden');
+                document.getElementById('upload-prompt').classList.add('hidden');
+                
+                preview.onload = () => {
+                    analyze();
+                    results.classList.remove('hidden');
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function analyze() {
+            const palette = colorThief.getPalette(preview, 5);
+            const sceneContainer = document.getElementById('scene-palette');
+            sceneContainer.innerHTML = '';
+
+            const hslPalette = palette.map(rgb => rgbToHsl(...rgb));
+            
+            // Render Scene Palette
+            palette.forEach((rgb, i) => {
+                const hex = rgbToHex(...rgb);
+                const div = document.createElement('div');
+                div.className = "flex items-center space-x-3 bg-slate-800/30 p-2 rounded-lg";
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded shadow-sm" style="background:${hex}"></div>
+                    <span class="font-mono text-xs text-slate-400 uppercase">${hex}</span>
+                `;
+                sceneContainer.appendChild(div);
+            });
+
+            // Calculate Average Scene Stats
+            const avgH = hslPalette.reduce((a, b) => a + b[0], 0) / 5;
+            const avgS = hslPalette.reduce((a, b) => a + b[1], 0) / 5;
+            const avgL = hslPalette.reduce((a, b) => a + b[2], 0) / 5;
+
+            updateEnemySuggestions(avgH, avgS, avgL);
+        }
+
+        function updateEnemySuggestions(h, s, l) {
+            const suggestions = [
+                {
+                    title: 'Le "Grunt"',
+                    desc: 'Ennemi standard. Contraste de teinte élevé.',
+                    h: (h + 180) % 360,
+                    s: 90,
+                    l: l > 50 ? 20 : 80
+                },
+                {
+                    title: 'L\'Elite',
+                    desc: 'Mid-boss. Split-complémentaire.',
+                    h: (h + 150) % 360,
+                    s: 100,
+                    l: 50
+                },
+                {
+                    title: 'Le Boss',
+                    desc: 'Saturation max / Teinte spéciale VFX.',
+                    h: (h + 210) % 360,
+                    s: 100,
+                    l: l > 50 ? 15 : 90
+                }
+            ];
+
+            const container = document.getElementById('enemy-options');
+            container.innerHTML = '';
+
+            suggestions.forEach((opt, i) => {
+                const hex = hslToHex(opt.h, opt.s, opt.l);
+                
+                // Update Simulator Dots
+                document.getElementById(`dot-${i+1}`).style.backgroundColor = hex;
+                if(opt.l > 60) {
+                    document.getElementById(`dot-${i+1}`).style.boxShadow = `0 0 40px ${hex}66`;
+                }
+
+                const card = document.createElement('div');
+                card.className = "group bg-slate-800 border border-slate-700 p-6 rounded-2xl hover:border-orange-500 transition-all cursor-pointer";
+                card.onclick = () => copyToClipboard(hex);
+                card.innerHTML = `
+                    <div class="h-24 w-full rounded-xl mb-4 shadow-inner flex items-center justify-center transition-transform group-hover:scale-105" style="background:${hex}">
+                        <span class="text-white mix-blend-difference font-black uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">Copier</span>
+                    </div>
+                    <h4 class="font-bold text-white uppercase text-sm italic tracking-widest">${opt.title}</h4>
+                    <p class="text-xs text-slate-500 mt-1 mb-4">${opt.desc}</p>
+                    <div class="font-mono text-orange-500 font-bold">${hex}</div>
+                `;
+                container.appendChild(card);
+            });
+
+            // Analysis Text
+            const brightnessMode = l > 50 ? "claire" : "sombre";
+            const toneMode = s > 40 ? "vive" : "désaturée";
+            document.getElementById('analysis-text').innerText = 
+                `Ta scène est principalement ${brightnessMode} et ${toneMode}. Pour garantir la lisibilité gameplay, on a poussé les valeurs ennemies vers le spectre opposé. On recommande une teinte proche de ${( (h + 180) % 360).toFixed(0)}° avec une saturation ${s < 30 ? 'élevée' : 'contrôlée'}.`;
+        }
+
+        // --- Color Math Helpers ---
+        function rgbToHex(r, g, b) {
+            return "#" + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            let max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max == min) h = s = 0;
+            else {
+                let d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return [h * 360, s * 100, l * 100];
+        }
+
+        function hslToHex(h, s, l) {
+            l /= 100;
+            const a = s * Math.min(l, 1 - l) / 100;
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+                return Math.round(255 * color).toString(16).padStart(2, '0');
+            };
+            return `#${f(0)}${f(8)}${f(4)}`;
+        }
+
+        window.copyToClipboard = (text) => {
+            navigator.clipboard.writeText(text);
+            alert(`Copié: ${text}`);
+        };
+    </script>
+</body>
+</html>
