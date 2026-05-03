@@ -1,0 +1,89 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hopdot Loader Replica</title>
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #60b2e9;
+      overflow: hidden;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <svg id="mainSVG" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" aria-label="Hopdot loader">
+    <g id="whole" fill="#fefefe" stroke="#fefefe" stroke-width="2">
+      <circle id="leader" cx="328" cy="300" r="13"></circle>
+      <circle class="follower" cx="364" cy="300" r="13"></circle>
+      <circle class="follower" cx="400" cy="300" r="13"></circle>
+      <circle class="follower" cx="436" cy="300" r="13"></circle>
+      <circle class="follower" cx="472" cy="300" r="13"></circle>
+    </g>
+  </svg>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+    const blendEases = (startEase, endEase, blender) => {
+      const s = gsap.parseEase(startEase);
+      const e = gsap.parseEase(endEase);
+      const bEase = gsap.parseEase(blender || 'power3.inOut');
+      return (v) => {
+        const b = bEase(v);
+        return s(v) * (1 - b) + e(v) * b;
+      };
+    };
+
+    gsap.set('svg', { visibility: 'visible' });
+
+    const tl = gsap.timeline({ repeat: -1 });
+
+    tl.to('#leader', {
+      duration: 4,
+      x: 36 * 3,
+      ease: blendEases('circ.in', 'expo')
+    })
+    .to('.follower', {
+      duration: 2,
+      svgOrigin: gsap.utils.wrap(['328 300', '364 300', '400 300', '436 300', '472 300']),
+      rotation: -180,
+      stagger: { amount: 2 },
+      ease: blendEases('circ.in', 'expo')
+    }, 0)
+    .to('#whole', {
+      x: 36,
+      duration: 5,
+      ease: 'linear'
+    }, 0)
+    .to('.follower', {
+      duration: 1.5,
+      stagger: {
+        amount: 1,
+        repeat: 1,
+        yoyo: true
+      },
+      ease: blendEases('power3.in', 'expo'),
+      fillOpacity: 0
+    }, 0);
+
+    tl.timeScale(3);
+  </script>
+</body>
+</html>
